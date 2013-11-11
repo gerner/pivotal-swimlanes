@@ -1,0 +1,7 @@
+token: <%= @token %> <br />
+projects:
+<ul>
+<% @projects.each do |project| %>
+  <li><a href="<%= url("/project/#{project.id}") %>"><%= project.name %></a></li>
+<% end %>
+</ul>

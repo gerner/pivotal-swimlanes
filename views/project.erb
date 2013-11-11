@@ -1,0 +1,43 @@
+<h1><%= @project.name %></h1>
+<table>
+  <thead>
+    <tr>
+      <th class="developer">owner</th>
+      <% @states.each do |state| %>
+        <th class="state <%= state %>"><%= state %> (<%= stories_for_state(@stories, state).reduce(0) {|tot,s| tot+(s.estimate.nil? ? 0 : s.estimate)} %>)</th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% @developers.each do |dev| %>
+      <% next unless dev.stories.size > 0 %>
+      <tr>
+        <td class="developer">
+          <div class="dev">
+            <span class="name"><%= dev.member.name %></span>
+            <span class="points"><%= dev.points_left %>/<%= dev.points_total %></span>
+            <span><%= dev.stories.size %></span>
+          </div>
+        </td>
+        <% @states.each do |state| %>
+          <td class="state <%= state %>">
+            <% stories_for_state(dev.stories, state).each do |s| %>
+              <div class="card">
+                <div class="type"><span class="<%= s.story_type %>"><%= s.story_type %></span>&nbsp;<%= s.estimate %></div>
+                <a target="_pivotal" href="<%= s.url %>"><%= s.name %></a>
+                <div class="clearfix"></div>
+                <div class="nextstate">
+                  <form action="<%= url("/project/#{@project.id}/stories/#{s.id}/next") %>" method="post">
+                    <input type="submit" value="next"/>
+                  </form>
+                </div>
+                <div class="clearfix"></div>
+                &nbsp;
+              </div>
+            <% end %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
