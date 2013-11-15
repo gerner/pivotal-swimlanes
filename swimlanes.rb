@@ -1,14 +1,26 @@
 require 'logger'
 require 'sinatra'
 require 'pivotal-tracker'
+require 'digest'
+require 'cgi'
 
-ACTIVE_STATES = [:unstarted, :rejected, :started]
+ACTIVE_STATES = [:unstarted, :rejected, :started].freeze
+
 STATE_FORWARD_TRANSITION = {
   unstarted: :started,
   started: :finished,
   finished: :delivered,
   delivered: :accepted
-}
+}.freeze
+
+STATES = [:unstarted, :rejected, :started, :finished, :delivered].freeze
+
+DEFAULT_PROFILE_IMAGES = {
+    'george@placed.com' => CGI.escape('http://4.bp.blogspot.com/-Q8gBxP-bIWE/UIUQxrlWtVI/AAAAAAAAHqI/XB_lHiygXt4/s640/cats_animals_little_kittens_kitten_kitty_cat_adorable_desktop_1920x1080_hd-wallpaper-782249.jpeg'),
+    'jeremy@placed.com' => CGI.escape('http://bananajoke.com/uploads/2012/06/Crazy-Cat.jpg'),
+    'mike@placed.com' => CGI.escape('http://www.jeffbullas.com/wp-content/uploads/2013/05/How-to-herd-casts-on-Twitter-1.jpg'),
+    'nick@placed.com' => CGI.escape('http://static.guim.co.uk/sys-images/Guardian/Pix/pictures/2013/10/29/1383067928482/Grumpy-Cat-Tardar-Sauce-001.jpg')
+}.freeze
 
 logger = Logger.new(STDERR)
 
@@ -23,33 +35,36 @@ class Developer
     @points_left = nil
   end
 
+  def gravatar(size = 80)
+    @gravatar ||= "http://www.gravatar.com/avatar/#{email_hash}?s=#{size}&d=#{DEFAULT_PROFILE_IMAGES[@member.email.downcase]}"
+  end
+
+  def email_hash
+    @email_hash ||= Digest::MD5.hexdigest(@member.email.downcase)
+  end
+
   def points_total
-    return @points_total unless @points_total.nil?
-    @points_total = stories.reduce(0) do |tot, s|
+    @points_total ||= stories.reduce(0) do |tot, s|
       tot + ((s.estimate.nil?)?0:s.estimate)
     end
   end
 
   def points_left
-    return @points_left unless @points_left.nil?
-    @points_left = stories.reduce(0) do |tot, s|
+    @points_left ||= stories.reduce(0) do |tot, s|
       tot + ((s.estimate.nil? || !ACTIVE_STATES.include?(s.current_state.to_sym))?0:s.estimate)
     end
   end
 
   def stories
-    return @stories unless @stories.nil?
-    states = [:unstarted, :rejected, :started, :finished, :delivered]
-    stories = project.stories.all({owner: member.initials, state: states})
+    @stories ||= project.stories.all({owner: member.initials, state: STATES})
   end
 
   def self.all(project, stories)
-    developers = PivotalTracker::Membership.all(project).map do |m|
+    PivotalTracker::Membership.all(project).map do |m|
       owned_stories = stories.select { |s| s.owned_by == m.name }
       Developer.new({member: m, project: project, stories: owned_stories})
     end
   end
-
 end
 
 helpers do
@@ -59,6 +74,10 @@ helpers do
     #  s = s[0..1]
     #end
     return s
+  end
+
+  def next_state(state)
+    STATE_FORWARD_TRANSITION[state].to_s.gsub('ed', '').capitalize
   end
 end
 

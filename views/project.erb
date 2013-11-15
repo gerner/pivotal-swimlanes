@@ -1,43 +1,47 @@
-<h1><%= @project.name %></h1>
-<table>
-  <thead>
-    <tr>
-      <th class="developer">owner</th>
-      <% @states.each do |state| %>
-        <th class="state <%= state %>"><%= state %> (<%= stories_for_state(@stories, state).reduce(0) {|tot,s| tot+(s.estimate.nil? ? 0 : s.estimate)} %>)</th>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody>
-    <% @developers.each do |dev| %>
-      <% next unless dev.stories.size > 0 %>
+
+<div id='main-content'>
+  <h1><%= @project.name %></h1>
+  <table id='swimlanes'>
+    <thead>
       <tr>
-        <td class="developer">
-          <div class="dev">
-            <span class="name"><%= dev.member.name %></span>
-            <span class="points"><%= dev.points_left %>/<%= dev.points_total %></span>
-            <span><%= dev.stories.size %></span>
-          </div>
-        </td>
+        <th class="developer">Owner</th>
         <% @states.each do |state| %>
-          <td class="state <%= state %>">
-            <% stories_for_state(dev.stories, state).each do |s| %>
-              <div class="card">
-                <div class="type"><span class="<%= s.story_type %>"><%= s.story_type %></span>&nbsp;<%= s.estimate %></div>
-                <a target="_pivotal" href="<%= s.url %>"><%= s.name %></a>
-                <div class="clearfix"></div>
-                <div class="nextstate">
-                  <form action="<%= url("/project/#{@project.id}/stories/#{s.id}/next") %>" method="post">
-                    <input type="submit" value="next"/>
-                  </form>
-                </div>
-                <div class="clearfix"></div>
-                &nbsp;
-              </div>
-            <% end %>
-          </td>
+          <th class="state <%= state %>"><%= state.capitalize %> <span class="badge"><%= stories_for_state(@stories, state).reduce(0) {|tot,s| tot+(s.estimate.nil? ? 0 : s.estimate)} %></span></th>
         <% end %>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% @developers.each do |dev| %>
+        <% next unless dev.stories.size > 0 %>
+        <tr>
+          <td class="developer">
+            <div class="dev">
+              <img class='gravatar' src="<%= dev.gravatar %>" />
+              <h3 class="name"><%= dev.member.name %></h3>
+              <h4><span class="badge points">Points: <%= dev.points_left %>/<%= dev.points_total %></span></h4>
+              <h4><span class="badge">Stories: <%= dev.stories.size %></span></h4>
+            </div>
+          </td>
+          <% @states.each do |state| %>
+            <td class="state <%= state %>">
+              <% stories_for_state(dev.stories, state).each do |s| %>
+                <div class="card">
+                  <p class='story-title'>
+                    <a target="_pivotal" href="<%= s.url %>"><%= s.name %></a>
+                  </p>
+                  <div class="type"><span class="badge <%= s.story_type %>"><%= s.story_type %> <%= s.estimate %></span></div>
+                  <div class="nextstate">
+                    <form action="<%= url("/project/#{@project.id}/stories/#{s.id}/next") %>" method="post">
+                      <input type="submit" class="btn btn-primary btn-xs" value="<%= next_state(state) %>"/>
+                    </form>
+                  </div>
+                  <div class='clearfix'></div>
+                </div>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
