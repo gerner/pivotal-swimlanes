@@ -1,5 +1,18 @@
-th, td {
-    border:1px solid gray;
+#main-content {
+    margin: auto;
+    width:1250px;
+}
+
+table#swimlanes {
+    border-spacing: 4px;
+    border-collapse: separate;
+    margin-top: 40px;
+}
+
+th {
+    background-color: transparent;
+    font-size: 24px;
+    font-weight: normal;
 }
 
 th.developer, td.developer {
@@ -8,53 +21,62 @@ th.developer, td.developer {
 
 th.state, td.state {
     width:250px;
+    vertical-align: top;
 }
 
-td.unstarted, th.unstarted {
+td.unstarted {
     background-color: lightgray;
 }
 
-td.rejected, th.rejected {
+td.rejected {
     background-color: lightgray;
 }
 
-td.started, th.started {
+td.started {
     background-color: khaki;
 }
 
-td.finished, th.finished {
-    background-color: khaki;
+td.finished {
+    background-color: #6B93B5;
 }
 
-td.delivered, th.delivered {
+td.delivered {
     background-color: darkseagreen;
 }
 
 div.card {
     width:240px;
     margin:5px;
-    padding: 2px;
-    border: 1px solid black;
+    padding: 8px;
+    border: 1px solid #CCC;
     background-color: #eee;
-    padding-left:2px;
-    padding-right:2px;
+}
+
+div.card a {
+    color: #666;
+}
+
+div.card form {
+    margin: 0px;
+}
+
+p.story-title {
+    margin-bottom: 12px;
 }
 
 .card .type {
     font-size: smaller;
     color: lightgray;
-    float: right;
-    padding: 2px;
-    margin-left: 5px;
-    background-color: gray;
+    float: left;
 }
 
 .type .feature {
-    color: khaki;
+    background-color: khaki;
+    color: #666;
 }
 
 .type .bug {
-    color: lightcoral;
+    background-color: lightcoral;
 }
 
 td.developer {
@@ -67,6 +89,10 @@ td.developer {
 
 .nextstate {
     float:right;
+}
+
+img.gravatar {
+    width: 80px;
 }
 
 .cf:before,
