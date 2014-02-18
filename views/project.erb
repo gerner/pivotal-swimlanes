@@ -14,7 +14,7 @@
       <% @developers.each do |dev| %>
         <% next unless dev.stories.size > 0 %>
         <tr>
-          <td class="developer">
+          <td class="developer" id="<%= dev.nickname %>">
             <div class="dev">
               <img class='gravatar' src="<%= dev.gravatar %>" />
               <h3 class="name"><%= dev.member.name %></h3>
@@ -32,7 +32,8 @@
                   <div class="type"><span class="badge <%= s.story_type %>"><%= s.story_type %> <%= s.estimate %></span></div>
                   <div class="nextstate">
                     <form action="<%= url("/project/#{@project.id}/stories/#{s.id}/next") %>" method="post">
-                      <input type="submit" class="btn btn-primary btn-xs" value="<%= next_state(state) %>"/>
+                        <input type="hidden" name="dev_target" value="<%= dev.nickname %>"/>
+                        <input type="submit" class="btn btn-primary btn-xs" value="<%= next_state(state) %>"/>
                     </form>
                   </div>
                   <div class='clearfix'></div>
