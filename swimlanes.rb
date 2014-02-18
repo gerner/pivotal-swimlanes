@@ -28,7 +28,8 @@ NICKNAMES = {
     'jeremy@placed.com' => 'J-Treezy',
     'mike@placed.com' => 'Chaos_Monkey_Mike',
     'nick@placed.com' => 'KSP_Master',
-    'will@placed.com' => 'The_Beebster'
+    'will@placed.com' => 'The_Beebster',
+    'dillon@placed.com' => 'Master_Intern'
 }
 
 logger = Logger.new(STDERR)
