@@ -22,6 +22,15 @@ DEFAULT_PROFILE_IMAGES = {
     'nick@placed.com' => CGI.escape('http://static.guim.co.uk/sys-images/Guardian/Pix/pictures/2013/10/29/1383067928482/Grumpy-Cat-Tardar-Sauce-001.jpg')
 }.freeze
 
+NICKNAMES = {
+    'brad@placed.com' => 'B-rad',
+    'george@placed.com' => 'The_Shredder',
+    'jeremy@placed.com' => 'J-Treezy',
+    'mike@placed.com' => 'Chaos_Monkey_Mike',
+    'nick@placed.com' => 'KSP_Master',
+    'will@placed.com' => 'The_Beebster'
+}
+
 logger = Logger.new(STDERR)
 
 class Developer
@@ -37,6 +46,10 @@ class Developer
 
   def gravatar(size = 80)
     @gravatar ||= "http://www.gravatar.com/avatar/#{email_hash}?s=#{size}&d=#{DEFAULT_PROFILE_IMAGES[@member.email.downcase]}"
+  end
+
+  def nickname
+    @nickname ||= NICKNAMES[@member.email.downcase]
   end
 
   def email_hash
@@ -117,10 +130,17 @@ post '/project/:project_id/stories/:story_id/next' do
   raise "unknown story" if story.nil?
   raise "#{story.current_state} has unknown next transition" if STATE_FORWARD_TRANSITION[story.current_state.to_sym].nil?
   old_state = story.current_state
-  story.current_state = STATE_FORWARD_TRANSITION[story.current_state.to_sym].to_s
+
+  # TODO: I don't like that we are special casing this right here, but for now it at least fixes the issue
+  if story.story_type == 'chore' && story.current_state == 'started'
+    story.current_state = 'accepted'
+  else
+    story.current_state = STATE_FORWARD_TRANSITION[story.current_state.to_sym].to_s
+  end
+
   logger.info("transitioning story #{story.id} from #{old_state} to #{story.current_state}")
   story.update
-  redirect "/project/#{params[:project_id]}"
+  redirect "/project/#{params[:project_id]}##{params[:dev_target]}"
 end
 
 post '/project/:project_id/stories/:story_id/blocked' do
