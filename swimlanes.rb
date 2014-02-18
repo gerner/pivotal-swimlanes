@@ -19,7 +19,8 @@ DEFAULT_PROFILE_IMAGES = {
     'george@placed.com' => CGI.escape('http://4.bp.blogspot.com/-Q8gBxP-bIWE/UIUQxrlWtVI/AAAAAAAAHqI/XB_lHiygXt4/s640/cats_animals_little_kittens_kitten_kitty_cat_adorable_desktop_1920x1080_hd-wallpaper-782249.jpeg'),
     'jeremy@placed.com' => CGI.escape('http://bananajoke.com/uploads/2012/06/Crazy-Cat.jpg'),
     'mike@placed.com' => CGI.escape('http://www.jeffbullas.com/wp-content/uploads/2013/05/How-to-herd-casts-on-Twitter-1.jpg'),
-    'nick@placed.com' => CGI.escape('http://static.guim.co.uk/sys-images/Guardian/Pix/pictures/2013/10/29/1383067928482/Grumpy-Cat-Tardar-Sauce-001.jpg')
+    'nick@placed.com' => CGI.escape('http://static.guim.co.uk/sys-images/Guardian/Pix/pictures/2013/10/29/1383067928482/Grumpy-Cat-Tardar-Sauce-001.jpg'),
+    'dillon@placed.com' => CGI.escape('http://cl.jroo.me/z3/Z/S/7/d/a.baa-One-cute-little-cat.jpg')
 }.freeze
 
 NICKNAMES = {
