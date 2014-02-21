@@ -24,5 +24,5 @@ function updatePage(e) {
   $("body").html($(e));
   $('html, body').animate({
     scrollTop: $("#" + window.location.hash.substring(1)).offset().top
-  }, 100);
+  }, 0);
 }
