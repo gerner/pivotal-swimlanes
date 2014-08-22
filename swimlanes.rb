@@ -7,6 +7,7 @@ require 'cgi'
 ACTIVE_STATES = [:unstarted, :rejected, :started].freeze
 
 STATE_FORWARD_TRANSITION = {
+  rejected: :started,
   unstarted: :started,
   started: :finished,
   finished: :delivered,
@@ -21,7 +22,8 @@ DEFAULT_PROFILE_IMAGES = {
     'mike@placed.com' => CGI.escape('http://www.jeffbullas.com/wp-content/uploads/2013/05/How-to-herd-casts-on-Twitter-1.jpg'),
     'nick@placed.com' => CGI.escape('http://static.guim.co.uk/sys-images/Guardian/Pix/pictures/2013/10/29/1383067928482/Grumpy-Cat-Tardar-Sauce-001.jpg'),
     'dillon@placed.com' => CGI.escape('http://cl.jroo.me/z3/Z/S/7/d/a.baa-One-cute-little-cat.jpg'),
-    'carrie@placed.com' => CGI.escape('http://sewichi-test.s3.amazonaws.com/brad/images/cat.png')
+    'carrie@placed.com' => CGI.escape('http://sewichi-test.s3.amazonaws.com/brad/images/cat.png'),
+    'tim@placed.com' => CGI.escape('http://rigor.com/wp-content/uploads/2013/01/business-cat.jpg')
 }.freeze
 
 NICKNAMES = {
