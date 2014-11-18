@@ -86,84 +86,91 @@ class Developer
   end
 end
 
-helpers do
-  def stories_for_state(stories, state)
-    s = stories.select { |s| s.current_state.to_sym == state }
-    #if state == :unstarted
-    #  s = s[0..1]
-    #end
-    return s
+class Swimlanes < Sinatra::Base
+
+  helpers do
+    def stories_for_state(stories, state)
+      s = stories.select { |s| s.current_state.to_sym == state }
+      #if state == :unstarted
+      #  s = s[0..1]
+      #end
+      return s
+    end
+
+    def next_state(state)
+      STATE_FORWARD_TRANSITION[state].to_s.gsub('ed', '').capitalize
+    end
   end
 
-  def next_state(state)
-    STATE_FORWARD_TRANSITION[state].to_s.gsub('ed', '').capitalize
-  end
-end
+  enable :sessions
 
-enable :sessions
-
-configure do
-end
-
-before do
-  session[:token] = params[:token] unless params[:token].nil?
-  PivotalTracker::Client.token = session[:token]
-end
-
-get '/' do
-  @token = session[:token]
-  erb :index
-end
-
-get '/project' do
-  @token = session[:token]
-  @projects = PivotalTracker::Project.all
-  erb :projects
-end
-
-get '/project/:project_id' do
-  @states = [:unstarted, :rejected, :started, :finished, :delivered]
-  conditional_states = [:rejected, :delivered]
-  @project = PivotalTracker::Project.find(params[:project_id].to_i)
-  @stories = @project.stories.all({state: @states})
-  @states.delete_if {|s| conditional_states.include?(s) && stories_for_state(@stories, s).empty? }
-  @developers = Developer.all(@project, @stories)
-  erb :project
-end
-
-post '/project/:project_id/stories/:story_id/next' do
-  story = PivotalTracker::Story.find(params[:story_id], params[:project_id])
-  raise "unknown story" if story.nil?
-  raise "#{story.current_state} has unknown next transition" if STATE_FORWARD_TRANSITION[story.current_state.to_sym].nil?
-  old_state = story.current_state
-
-  # TODO: I don't like that we are special casing this right here, but for now it at least fixes the issue
-  if story.story_type == 'chore' && story.current_state == 'started'
-    story.current_state = 'accepted'
-  else
-    story.current_state = STATE_FORWARD_TRANSITION[story.current_state.to_sym].to_s
+  configure do
   end
 
-  logger.info("transitioning story #{story.id} from #{old_state} to #{story.current_state}")
-  story.update
-  redirect "/project/#{params[:project_id]}##{params[:dev_target]}"
+  before do
+    session[:token] = params[:token] unless params[:token].nil?
+    PivotalTracker::Client.token = session[:token]
+  end
+
+  get '/' do
+    @token = session[:token]
+    erb :index
+  end
+
+  get '/project' do
+    @token = session[:token]
+    @projects = PivotalTracker::Project.all
+    erb :projects
+  end
+
+  get '/project/:project_id' do
+    @states = [:unstarted, :rejected, :started, :finished, :delivered]
+    conditional_states = [:rejected, :delivered]
+    @project = PivotalTracker::Project.find(params[:project_id].to_i)
+    @stories = @project.stories.all({state: @states})
+    @states.delete_if {|s| conditional_states.include?(s) && stories_for_state(@stories, s).empty? }
+    @developers = Developer.all(@project, @stories)
+    erb :project
+  end
+
+  post '/project/:project_id/stories/:story_id/next' do
+    story = PivotalTracker::Story.find(params[:story_id], params[:project_id])
+    raise "unknown story" if story.nil?
+    raise "#{story.current_state} has unknown next transition" if STATE_FORWARD_TRANSITION[story.current_state.to_sym].nil?
+    old_state = story.current_state
+
+    # TODO: I don't like that we are special casing this right here, but for now it at least fixes the issue
+    if story.story_type == 'chore' && story.current_state == 'started'
+      story.current_state = 'accepted'
+    else
+      story.current_state = STATE_FORWARD_TRANSITION[story.current_state.to_sym].to_s
+    end
+
+    logger.info("transitioning story #{story.id} from #{old_state} to #{story.current_state}")
+    story.update
+    redirect "/project/#{params[:project_id]}##{params[:dev_target]}"
+  end
+
+  post '/project/:project_id/stories/:story_id/blocked' do
+    story = PivotalTracker::Story.find(params[:story_id], params[:project_id])
+    raise "unknown story" if story.nil?
+    redirect "/project/#{params[:project_id]}"
+  end
+
+  get '/project/:project_id/bug' do
+    @project = PivotalTracker::Project.find(params[:project_id].to_i)
+    @submitted = params[:submitted]
+    erb :bug_form
+  end
+
+  post '/project/:project_id/bug' do
+    project = PivotalTracker::Project.find(params[:project_id].to_i)
+    title = "#{params[:submitter_name]} - #{params[:title]}"
+    project.stories.create(name: title, story_type: 'bug', description: params[:description])
+    redirect "/project/#{params[:project_id]}/bug?submitted=true"
+  end
+
+  run! if app_file == $0
 end
 
-post '/project/:project_id/stories/:story_id/blocked' do
-  story = PivotalTracker::Story.find(params[:story_id], params[:project_id])
-  raise "unknown story" if story.nil?
-  redirect "/project/#{params[:project_id]}"
-end
 
-get '/project/:project_id/bug' do
-  @project = PivotalTracker::Project.find(params[:project_id].to_i)
-  @submitted = params[:submitted]
-  erb :bug_form
-end
-
-post '/project/:project_id/bug' do
-  project = PivotalTracker::Project.find(params[:project_id].to_i)
-  title = "#{params[:submitter_name]} - #{params[:title]}"
-  project.stories.create(name: title, story_type: 'bug', description: params[:description])
-  redirect "/project/#{params[:project_id]}/bug?submitted=true"
-end
