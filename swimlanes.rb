@@ -23,7 +23,8 @@ DEFAULT_PROFILE_IMAGES = {
     'nick@placed.com' => CGI.escape('http://static.guim.co.uk/sys-images/Guardian/Pix/pictures/2013/10/29/1383067928482/Grumpy-Cat-Tardar-Sauce-001.jpg'),
     'dillon@placed.com' => CGI.escape('http://cl.jroo.me/z3/Z/S/7/d/a.baa-One-cute-little-cat.jpg'),
     'carrie@placed.com' => CGI.escape('http://sewichi-test.s3.amazonaws.com/brad/images/cat.png'),
-    'tim@placed.com' => CGI.escape('http://rigor.com/wp-content/uploads/2013/01/business-cat.jpg')
+    'tim@placed.com' => CGI.escape('http://rigor.com/wp-content/uploads/2013/01/business-cat.jpg'),
+    'suma.adabala@placed.com' => CGI.escape('https://m1.behance.net/rendition/modules/36475251/disp/f2e44d84e51378f2e3ee9231653707a0.jpg')
 }.freeze
 
 NICKNAMES = {
