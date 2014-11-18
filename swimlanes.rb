@@ -153,3 +153,16 @@ post '/project/:project_id/stories/:story_id/blocked' do
   raise "unknown story" if story.nil?
   redirect "/project/#{params[:project_id]}"
 end
+
+get '/project/:project_id/bug' do
+  @project = PivotalTracker::Project.find(params[:project_id].to_i)
+  @submitted = params[:submitted]
+  erb :bug_form
+end
+
+post '/project/:project_id/bug' do
+  project = PivotalTracker::Project.find(params[:project_id].to_i)
+  title = "#{params[:submitter_name]} - #{params[:title]}"
+  project.stories.create(name: title, story_type: 'bug', description: params[:description])
+  redirect "/project/#{params[:project_id]}/bug?submitted=true"
+end
