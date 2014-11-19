@@ -74,7 +74,7 @@ class Swimlanes < Sinatra::Base
 
   register Sinatra::ConfigFile
 
-  config_file '../config.yml'
+  config_file '/srv/swimlanes/config.yml'
 
   helpers do
     def stories_for_state(stories, state)
