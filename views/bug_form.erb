@@ -1,16 +1,23 @@
 
 <div id='main-content'>
-  <h1><%= @project.name %></h1>
+  <h1><%= @project.name %> - <%= @bug_type %></h1>
 
     <% if @submitted %>
-      Thanks for the bug report!
+      Thanks for the <% @bug_type %> report!
     <% end %>
 
     <form action="<%= url("/project/#{@project.id}/bug") %>" method="post">
+      <input name="type" type="hidden" value="<%= @bug_type %>" />
       <label for="submitter_name">Your Name</label><br />
-      <input id="submitter_name" name="submitter_name" type="text" value="<%= @requester %>"/><br />
+      <input id="submitter_name" name="submitter_name" type="text" value="<%= @requester %>" readonly/><br />
       <label for="title">Bug Title</label><br />
       <input id="title" name="title" type="text" /><br />
+      <label for="label">Label</label><br />
+      <select id="label" name="label"><br />
+      <% @labels.each do |label| %>
+        <option value="<%= label %>"><%= label %></option>
+      <% end %>
+      </select><br />
       <label for="description">Bug Description</label><br />
       <textarea id="description" name="description" cols="80" rows="10"></textarea><br />
       <input type="submit" />

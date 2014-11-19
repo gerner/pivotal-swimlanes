@@ -3,6 +3,7 @@ require 'sinatra'
 require 'pivotal-tracker'
 require 'digest'
 require 'cgi'
+require 'sinatra/config_file'
 
 ACTIVE_STATES = [:unstarted, :rejected, :started].freeze
 
@@ -16,26 +17,9 @@ STATE_FORWARD_TRANSITION = {
 
 STATES = [:unstarted, :rejected, :started, :finished, :delivered].freeze
 
-DEFAULT_PROFILE_IMAGES = {
-    'george@placed.com' => CGI.escape('http://4.bp.blogspot.com/-Q8gBxP-bIWE/UIUQxrlWtVI/AAAAAAAAHqI/XB_lHiygXt4/s640/cats_animals_little_kittens_kitten_kitty_cat_adorable_desktop_1920x1080_hd-wallpaper-782249.jpeg'),
-    'jeremy@placed.com' => CGI.escape('http://bananajoke.com/uploads/2012/06/Crazy-Cat.jpg'),
-    'mike@placed.com' => CGI.escape('http://www.jeffbullas.com/wp-content/uploads/2013/05/How-to-herd-casts-on-Twitter-1.jpg'),
-    'nick@placed.com' => CGI.escape('http://static.guim.co.uk/sys-images/Guardian/Pix/pictures/2013/10/29/1383067928482/Grumpy-Cat-Tardar-Sauce-001.jpg'),
-    'dillon@placed.com' => CGI.escape('http://cl.jroo.me/z3/Z/S/7/d/a.baa-One-cute-little-cat.jpg'),
-    'carrie@placed.com' => CGI.escape('http://sewichi-test.s3.amazonaws.com/brad/images/cat.png'),
-    'tim@placed.com' => CGI.escape('http://rigor.com/wp-content/uploads/2013/01/business-cat.jpg'),
-    'suma.adabala@placed.com' => CGI.escape('https://m1.behance.net/rendition/modules/36475251/disp/f2e44d84e51378f2e3ee9231653707a0.jpg')
-}.freeze
+DEFAULT_PROFILE_IMAGES = {}
 
-NICKNAMES = {
-    'brad@placed.com' => 'B-rad',
-    'george@placed.com' => 'The_Shredder',
-    'jeremy@placed.com' => 'J-Treezy',
-    'mike@placed.com' => 'Chaos_Monkey_Mike',
-    'nick@placed.com' => 'KSP_Master',
-    'will@placed.com' => 'The_Beebster',
-    'dillon@placed.com' => 'Master_Intern'
-}
+NICKNAMES = {}
 
 logger = Logger.new(STDERR)
 
@@ -88,6 +72,10 @@ end
 
 class Swimlanes < Sinatra::Base
 
+  register Sinatra::ConfigFile
+
+  config_file '../config.yml'
+
   helpers do
     def stories_for_state(stories, state)
       s = stories.select { |s| s.current_state.to_sym == state }
@@ -105,11 +93,13 @@ class Swimlanes < Sinatra::Base
   enable :sessions
 
   configure do
+    DEFAULT_PROFILE_IMAGES.merge!(Hash[ settings.users.reject { |k,v| v["profile_image"].nil? }.map { |k,v| [v["email"], CGI.escape(v["profile_image"])] } ])
+    NICKNAMES.merge!(Hash[ settings.users.reject { |k,v| v["nickname"].nil? }.map { |k,v| [v["email"], CGI.escape(v["nickname"])] } ])
   end
 
   before do
     session[:token] = params[:token] unless params[:token].nil?
-    PivotalTracker::Client.token = session[:token]
+    PivotalTracker::Client.token = session[:token] || settings.token
   end
 
   get '/' do
@@ -161,14 +151,25 @@ class Swimlanes < Sinatra::Base
     @requester = env['HTTP_X_FORWARDED_REMOTE_USER']
     @project = PivotalTracker::Project.find(params[:project_id].to_i)
     @submitted = params[:submitted]
+    @labels = settings.bug_form["labels"]
+    @bug_type = params[:type] || "bug"
     erb :bug_form
   end
 
   post '/project/:project_id/bug' do
     project = PivotalTracker::Project.find(params[:project_id].to_i)
     title = "#{params[:submitter_name]} - #{params[:title]}"
-    project.stories.create(name: title, story_type: 'bug', description: params[:description])
-    redirect to("/project/#{params[:project_id]}/bug?submitted=true")
+
+    user = settings.users[params[:submitter_name]]
+    user_email = user["email"] if user
+    requesting_developer = Developer.all(project, []).find { |d| d.member.email == user_email }
+
+    if requesting_developer
+      project.stories.create(name: title, requested_by: requesting_developer.member.name, story_type: params[:type], description: params[:description], labels: params[:label])
+    else
+      project.stories.create(name: title, story_type: params[:type], description: params[:description], labels: params[:label])
+    end
+    redirect to("/project/#{params[:project_id]}/bug?submitted=true&type=#{params[:type]}")
   end
 
   run! if app_file == $0

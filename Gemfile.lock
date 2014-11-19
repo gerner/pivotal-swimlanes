@@ -1,7 +1,9 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    backports (3.6.4)
     builder (3.2.2)
+    coderay (1.1.0)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
     happymapper (0.4.1)
@@ -9,8 +11,10 @@ GEM
     json (1.8.1)
     kgio (2.9.2)
     libxml-ruby (2.7.0)
+    method_source (0.8.2)
     mime-types (1.25.1)
     mini_portile (0.6.1)
+    multi_json (1.10.1)
     nokogiri (1.6.4.1)
       mini_portile (~> 0.6.0)
     nokogiri-happymapper (0.5.9)
@@ -264,9 +268,15 @@ GEM
       nokogiri (>= 1.5.5)
       nokogiri-happymapper (>= 0.5.4)
       rest-client (~> 1.6.0)
+    pry (0.10.1)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
+    rack-test (0.6.2)
+      rack (>= 1.0)
     raindrops (0.13.0)
     rdoc (4.1.2)
       json (~> 1.4)
@@ -278,6 +288,14 @@ GEM
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
+    sinatra-contrib (1.4.2)
+      backports (>= 2.0)
+      multi_json
+      rack-protection
+      rack-test
+      sinatra (~> 1.4.0)
+      tilt (~> 1.3)
+    slop (3.6.0)
     tilt (1.4.1)
     unicorn (4.8.3)
       kgio (~> 2.6)
@@ -289,5 +307,7 @@ PLATFORMS
 
 DEPENDENCIES
   pivotal-tracker
+  pry
   sinatra
+  sinatra-contrib
   unicorn
