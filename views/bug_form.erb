@@ -8,7 +8,7 @@
 
     <form action="<%= url("/project/#{@project.id}/bug") %>" method="post">
       <label for="submitter_name">Your Name</label><br />
-      <input id="submitter_name" name="submitter_name" type="text" /><br />
+      <input id="submitter_name" name="submitter_name" type="text" value="<%= @requester %>/><br />
       <label for="title">Bug Title</label><br />
       <input id="title" name="title" type="text" /><br />
       <label for="description">Bug Description</label><br />

@@ -164,6 +164,7 @@ class Swimlanes < Sinatra::Base
   end
 
   post '/project/:project_id/bug' do
+    @requester = env['HTTP_X_FORWARDED_REMOTE_USER']
     project = PivotalTracker::Project.find(params[:project_id].to_i)
     title = "#{params[:submitter_name]} - #{params[:title]}"
     project.stories.create(name: title, story_type: 'bug', description: params[:description])
