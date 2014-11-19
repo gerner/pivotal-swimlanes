@@ -148,13 +148,13 @@ class Swimlanes < Sinatra::Base
 
     logger.info("transitioning story #{story.id} from #{old_state} to #{story.current_state}")
     story.update
-    redirect "/project/#{params[:project_id]}##{params[:dev_target]}"
+    redirect to("/project/#{params[:project_id]}##{params[:dev_target]}")
   end
 
   post '/project/:project_id/stories/:story_id/blocked' do
     story = PivotalTracker::Story.find(params[:story_id], params[:project_id])
     raise "unknown story" if story.nil?
-    redirect "/project/#{params[:project_id]}"
+    redirect to("/project/#{params[:project_id]}")
   end
 
   get '/project/:project_id/bug' do
@@ -168,7 +168,7 @@ class Swimlanes < Sinatra::Base
     project = PivotalTracker::Project.find(params[:project_id].to_i)
     title = "#{params[:submitter_name]} - #{params[:title]}"
     project.stories.create(name: title, story_type: 'bug', description: params[:description])
-    redirect "/project/#{params[:project_id]}/bug?submitted=true"
+    redirect to("/project/#{params[:project_id]}/bug?submitted=true")
   end
 
   run! if app_file == $0
