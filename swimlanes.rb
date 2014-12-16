@@ -148,7 +148,7 @@ class Swimlanes < Sinatra::Base
   end
 
   get '/project/:project_id/bug' do
-    @requester = env['HTTP_X_FORWARDED_REMOTE_USER']
+    @requester = params[:submitter_override] || env['HTTP_X_FORWARDED_REMOTE_USER']
     @project = PivotalTracker::Project.find(params[:project_id].to_i)
     @submitted = params[:submitted]
     @labels = settings.bug_form["labels"]
@@ -163,6 +163,8 @@ class Swimlanes < Sinatra::Base
     user = settings.users[params[:submitter_name]]
     user_email = user["email"] if user
     requesting_developer = Developer.all(project, []).find { |d| d.member.email == user_email }
+
+    logger.info("request #{title} submitted by #{params[:submitter_name]} with email #{user_email} with name #{requesting_developer ? requesting_developer.member.name : nil}")
 
     if requesting_developer
       project.stories.create(name: title, requested_by: requesting_developer.member.name, story_type: params[:type], description: params[:description], labels: params[:label])
